@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold Master AI v5</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--sf:#12131c;--bd:#232635;--gold:#f59e0b;--glow:#f59e0b40;--tx:#f8fafc;--dim:#64748b;--up:#10b981;--dn:#ef4444;--cy:#06b6d4}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--tx);font-family:'JetBrains Mono',monospace;padding:12px;display:flex;justify-content:center;min-height:100vh}
+.wrap{width:100%;max-width:1000px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:8px;padding:14px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.logo{font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:700;color:var(--gold);text-shadow:0 0 15px var(--glow)}
+.ver{font-size:11px;color:var(--dim);margin-left:8px}
+.st{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.dot.on{background:var(--up);box-shadow:0 0 10px var(--up);animation:p 1.2s infinite}
+.dot.wait{background:var(--gold)}
+@keyframes p{50%{opacity:.4;transform:scale(.8)}}
+.tick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.tick .c{text-align:center}
+.lb{font-size:11px;color:var(--dim)}
+.v{font-size:22px;font-weight:700;margin-top:4px}
+.up{color:var(--up)}.dn{color:var(--dn)}
+.ind{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;font-size:12px}
+.ind div{text-align:center}.ind b{display:block;font-size:16px;margin-top:3px}
+.tf{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.tf button,.sm{background:transparent;color:var(--dim);border:1px solid var(--bd);border-radius:6px;padding:6px 12px;font-family:inherit;font-size:12px;cursor:pointer}
+.tf button.a{color:var(--gold);border-color:var(--gold)}
+#tv{height:420px}
+canvas{width:100%;height:70px;display:block}
+.go{width:100%;background:linear-gradient(90deg,#d97706,#f59e0b,#d97706);background-size:200% auto;color:#000;font-family:'Chakra Petch',sans-serif;font-size:18px;font-weight:700;padding:18px;border:0;border-radius:8px;cursor:pointer;transition:.4s}
+.go:hover{background-position:right center}.go:disabled{background:var(--bd);color:var(--dim);cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=password],input[type=text]{flex:1;min-width:180px;background:var(--bg);border:1px solid var(--bd);color:var(--tx);padding:9px;border-radius:6px;font-family:inherit;font-size:12px}
+.hid{display:none!important}
+.out{border-color:var(--cy)}
+.out h3{font-family:'Chakra Petch',sans-serif;color:var(--gold);font-size:17px;border-bottom:1px solid var(--bd);padding-bottom:6px;margin:14px 0 8px}
+.out h3:first-child{margin-top:0}
+.out ul{padding-left:20px}.out li{margin-bottom:6px;font-family:'Chakra Petch',sans-serif;line-height:1.5}
+.bias{display:inline-block;padding:3px 12px;border-radius:5px;font-weight:700;border:1px solid}
+.bias.BUY{color:var(--up);background:#10b98133;border-color:var(--up)}
+.bias.SELL{color:var(--dn);background:#ef444433;border-color:var(--dn)}
+.bias.WAIT{color:var(--gold);background:#f59e0b33;border-color:var(--gold)}
+.lv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;text-align:center;font-size:12px}
+.lv div{border:1px solid var(--bd);border-radius:6px;padding:8px}.lv b{display:block;font-size:15px;margin-top:3px}
+.note{font-size:11px;color:var(--dim);line-height:1.6}
+.err{color:var(--dn);border:1px solid var(--dn);padding:10px;border-radius:6px;font-size:13px}
+.hist div{font-size:12px;padding:6px 0;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;gap:8px}
+@media(max-width:600px){.tick,.ind{grid-template-columns:repeat(2,1fr)}.ind{grid-template-columns:repeat(3,1fr)}.lv{grid-template-columns:repeat(2,1fr)}#tv{height:340px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="card">
+  <div><span class="logo">GOLD MASTER AI</span><span class="ver">v5.0</span></div>
+  <div class="st"><div class="dot" id="dot"></div><span id="ss">เริ่มระบบ</span></div>
+</header>
+
+<section class="card tick">
+  <div class="c"><div class="lb">PAXG/USDT (อ้างอิงทอง)</div><div class="v" id="pLive">0.00</div></div>
+  <div class="c"><div class="lb">เปลี่ยนแปลง 24 ชม.</div><div class="v" id="pChg">0.00%</div></div>
+  <div class="c"><div class="lb">สูงสุด 24 ชม.</div><div class="v" id="pHi">0.00</div></div>
+  <div class="c"><div class="lb">ต่ำสุด 24 ชม.</div><div class="v" id="pLo">0.00</div></div>
+</section>
+
+<section class="card">
+  <div class="tf" id="tf"></div>
+  <div id="tv"></div>
+</section>
+
+<section class="card">
+  <div class="ind" id="ind"></div>
+  <canvas id="spark"></canvas>
+</section>
+
+<section class="card">
+  <div class="row">
+    <input type="password" id="key" placeholder="ไม่บังคับ: ใส่คีย์ของคุณเอง (ถ้าไม่ใส่ จะใช้ระบบหลังบ้าน)" autocomplete="off">
+    <button class="sm" id="saveKey">บันทึก</button>
+    <button class="sm" id="clrKey">ลบคีย์</button>
+    <label class="note"><input type="checkbox" id="tts"> อ่านออกเสียง</label>
+  </div>
+</section>
+
+<button class="go" id="go">[ เริ่ม ] วิเคราะห์ด้วย AI</button>
+<div id="load" class="card hid note" style="color:var(--cy)">กำลังรวบรวมตัวชี้วัดและส่งให้ AI วิเคราะห์...</div>
+<section id="out" class="card out hid"></section>
+
+<section class="card hist"><div class="lb" style="margin-bottom:6px">ประวัติการวิเคราะห์ล่าสุด</div><div id="hist"><span class="note">ยังไม่มีประวัติ</span></div></section>
+
+<p class="note">ข้อมูลนี้ใช้ราคา PAXG ซึ่งอิงทองคำจริงแต่ไม่เท่ากับ XAU/USD เสมอไป ผลวิเคราะห์จาก AI เป็นข้อมูลประกอบการตัดสินใจเท่านั้น ไม่ใช่คำแนะนำการลงทุน</p>
+</div>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const S={price:0,prev:0,hi:0,lo:0,chg:0,vol:0,tf:'15m',closes:[],ind:null,retry:0};
+const TFS={'5m':'5','15m':'15','1h':'60','4h':'240','1d':'D'};
+const MODEL='gemini-flash-latest';
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+
+/* ---------- Indicators ---------- */
+function ema(a,n){const k=2/(n+1);let e=a[0];for(let i=1;i<a.length;i++)e=a[i]*k+e*(1-k);return e}
+function rsi(c,n=14){let g=0,l=0;for(let i=1;i<=n;i++){const d=c[i]-c[i-1];d>=0?g+=d:l-=d}g/=n;l/=n;
+  for(let i=n+1;i<c.length;i++){const d=c[i]-c[i-1];g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n}
+  return l===0?100:100-100/(1+g/l)}
+function atr(k,n=14){const tr=k.map((x,i)=>i?Math.max(x.h-x.l,Math.abs(x.h-k[i-1].c),Math.abs(x.l-k[i-1].c)):x.h-x.l);
+  let a=tr.slice(1,n+1).reduce((s,v)=>s+v,0)/n;for(let i=n+1;i<tr.length;i++)a=(a*(n-1)+tr[i])/n;return a}
+
+async function loadKlines(){
+  try{
+    const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=PAXGUSDT&interval=${S.tf}&limit=200`);
+    if(!r.ok)throw new Error(r.status);
+    const k=(await r.json()).map(x=>({h:+x[2],l:+x[3],c:+x[4]}));
+    const c=k.map(x=>x.c);S.closes=c;
+    const last50=k.slice(-50);
+    S.ind={rsi:rsi(c),ema20:ema(c.slice(-100),20),ema50:ema(c.slice(-150),50),atr:atr(k),
+      sup:Math.min(...last50.map(x=>x.l)),res:Math.max(...last50.map(x=>x.h))};
+    renderInd();drawSpark();
+  }catch(e){$('ind').innerHTML='<span class="note">โหลดตัวชี้วัดไม่สำเร็จ ('+e.message+')</span>'}
+}
+function renderInd(){
+  const i=S.ind;if(!i)return;
+  const rc=i.rsi>70?'dn':i.rsi<30?'up':'';
+  const cells=[['RSI 14',i.rsi.toFixed(1),rc],['EMA 20',i.ema20.toFixed(2),''],['EMA 50',i.ema50.toFixed(2),i.ema20>i.ema50?'up':'dn'],
+    ['ATR 14',i.atr.toFixed(2),''],['แนวรับ/ต้าน',i.sup.toFixed(0)+' / '+i.res.toFixed(0),'']];
+  $('ind').innerHTML=cells.map(([a,b,c])=>`<div><span class="lb">${a}</span><b class="${c}">${b}</b></div>`).join('');
+}
+function drawSpark(){
+  const cv=$('spark'),d=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  cv.width=w*d;cv.height=h*d;const x=cv.getContext('2d');x.scale(d,d);
+  const c=S.closes.slice(-80);if(c.length<2)return;
+  const mn=Math.min(...c),mx=Math.max(...c);
+  x.strokeStyle=c[c.length-1]>=c[0]?'#10b981':'#ef4444';x.lineWidth=1.5;x.beginPath();
+  c.forEach((v,i)=>{const px=i/(c.length-1)*w,py=h-4-(v-mn)/(mx-mn||1)*(h-8);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+}
+
+/* ---------- Chart ---------- */
+function initChart(){
+  $('tv').innerHTML='<div id="tvc" style="height:100%"></div>';
+  if(!window.TradingView){$('tv').innerHTML='<span class="note">โหลดกราฟไม่สำเร็จ</span>';return}
+  new TradingView.widget({autosize:true,symbol:'OANDA:XAUUSD',interval:TFS[S.tf],timezone:'Asia/Bangkok',theme:'dark',style:'1',locale:'th_TH',
+    enable_publishing:false,backgroundColor:'#12131c',gridColor:'#232635',save_image:false,container_id:'tvc'});
+}
+function buildTf(){
+  $('tf').innerHTML=Object.keys(TFS).map(t=>`<button data-t="${t}" class="${t===S.tf?'a':''}">${t}</button>`).join('');
+  $('tf').onclick=e=>{const t=e.target.dataset.t;if(!t)return;S.tf=t;buildTf();initChart();loadKlines()};
+}
+
+/* ---------- Live stream with backoff ---------- */
+function setStatus(txt,cls){$('ss').textContent=txt;$('dot').className='dot '+cls}
+function connect(){
+  const ws=new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@ticker');
+  ws.onopen=()=>{S.retry=0;setStatus('ออนไลน์','on')};
+  ws.onmessage=ev=>{
+    try{const p=JSON.parse(ev.data);
+      S.prev=S.price;S.price=+p.c;S.hi=+p.h;S.lo=+p.l;S.chg=+p.P;
+      $('pLive').textContent=S.price.toFixed(2);$('pHi').textContent=S.hi.toFixed(2);$('pLo').textContent=S.lo.toFixed(2);
+      $('pChg').textContent=(S.chg>=0?'+':'')+S.chg.toFixed(2)+'%';$('pChg').className='v '+(S.chg>=0?'up':'dn');
+      if(S.prev)$('pLive').className='v '+(S.price>=S.prev?'up':'dn');
+    }catch(e){console.error(e)}
+  };
+  ws.onclose=()=>{const d=Math.min(30000,2000*2**S.retry++);setStatus('ต่อใหม่ใน '+Math.round(d/1000)+' วิ','wait');setTimeout(connect,d)};
+  ws.onerror=()=>ws.close();
+}
+
+/* ---------- AI ---------- */
+const SCHEMA={type:'OBJECT',properties:{
+  bias:{type:'STRING',enum:['BUY','SELL','WAIT']},confidence:{type:'INTEGER'},
+  technical:{type:'ARRAY',items:{type:'STRING'}},macro:{type:'ARRAY',items:{type:'STRING'}},
+  entry:{type:'NUMBER'},stop_loss:{type:'NUMBER'},take_profit:{type:'NUMBER'},summary:{type:'STRING'}},
+  required:['bias','confidence','technical','macro','stop_loss','take_profit','summary']};
+
+function el(t,txt,cls){const e=document.createElement(t);if(txt!=null)e.textContent=txt;if(cls)e.className=cls;return e}
+function renderResult(r){
+  const o=$('out');o.replaceChildren();
+  const top=el('div');top.append(el('span','สัญญาณ: ','lb'),el('span',r.bias,'bias '+r.bias),el('span','  ความมั่นใจ '+r.confidence+'%','lb'));o.append(top);
+  o.append(el('h3','สัญญาณเทคนิค'));const u1=el('ul');(r.technical||[]).forEach(t=>u1.append(el('li',t)));o.append(u1);
+  o.append(el('h3','ปัจจัยมหภาค'));const u2=el('ul');(r.macro||[]).forEach(t=>u2.append(el('li',t)));o.append(u2);
+  const lv=el('div',null,'lv');
+  [['เข้า',r.entry],['ตัดขาดทุน',r.stop_loss],['เป้าหมาย',r.take_profit]].forEach(([a,b])=>{const d=el('div');d.append(el('span',a,'lb'),el('b',b!=null?(+b).toFixed(2):'-'));lv.append(d)});
+  if(r.entry&&r.stop_loss&&r.take_profit){const rr=Math.abs(r.take_profit-r.entry)/Math.abs(r.entry-r.stop_loss);const d=el('div');d.append(el('span','R:R','lb'),el('b',isFinite(rr)?rr.toFixed(2):'-'));lv.append(d)}
+  o.append(lv,el('h3','บทสรุป'),el('p',r.summary));
+}
+function addHist(r){
+  let h=JSON.parse(ls.get('gm_hist')||'[]');
+  h.unshift({t:new Date().toLocaleString('th-TH'),p:S.price,b:r.bias,c:r.confidence});h=h.slice(0,8);ls.set('gm_hist',JSON.stringify(h));showHist();
+}
+function showHist(){
+  const h=JSON.parse(ls.get('gm_hist')||'[]');if(!h.length)return;
+  $('hist').replaceChildren(...h.map(x=>{const d=el('div');d.append(el('span',x.t),el('span','$'+x.p.toFixed(2)),el('span',x.b+' '+x.c+'%','bias '+x.b));return d}));
+}
+function speak(m){if(!$('tts').checked||!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(m);u.lang='th-TH';speechSynthesis.speak(u)}
+
+async function analyze(){
+  const key=ls.get('gm_key');
+  if(!S.price||!S.ind){alert('ข้อมูลตลาดยังโหลดไม่ครบ รอสักครู่');return}
+  const i=S.ind;
+  $('go').disabled=true;$('go').textContent='กำลังวิเคราะห์...';$('out').classList.add('hid');$('load').classList.remove('hid');
+  const prompt=`คุณคือนักวิเคราะห์ทองคำ ตอบเป็นภาษาไทย กระชับ อ้างอิงเฉพาะข้อมูลที่ให้ ห้ามแต่งข่าวหรือตัวเลขที่ไม่มีในข้อมูล หากสัญญาณไม่ชัดให้ตอบ WAIT
+ข้อมูลเรียลไทม์ (PAXG/USDT, ไทม์เฟรม ${S.tf}):
+ราคา ${S.price.toFixed(2)} | 24h สูง ${S.hi.toFixed(2)} ต่ำ ${S.lo.toFixed(2)} | เปลี่ยนแปลง ${S.chg}%
+RSI14 ${i.rsi.toFixed(1)} | EMA20 ${i.ema20.toFixed(2)} | EMA50 ${i.ema50.toFixed(2)} | ATR14 ${i.atr.toFixed(2)}
+แนวรับ(50 แท่ง) ${i.sup.toFixed(2)} | แนวต้าน ${i.res.toFixed(2)}
+กฎ: stop_loss ควรห่างจาก entry ประมาณ 1-2 เท่าของ ATR; ในหัวข้อ macro ให้พูดเป็นปัจจัยทั่วไปที่ต้องจับตา (ดอลลาร์ ดอกเบี้ย ความเสี่ยงโลก) และบอกชัดว่าไม่ได้อิงข่าวสด`;
+  try{
+    const r=key
+      ?await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,{
+        method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{temperature:0.2,responseMimeType:'application/json',responseSchema:SCHEMA}})})
+      :await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    if(!r.ok){const t=await r.text();throw new Error('HTTP '+r.status+(r.status===404&&!key?' — ยังไม่มีระบบหลังบ้าน ให้ใส่ API Key ของคุณเอง':'')+(r.status===429?' — เรียกถี่เกินไป รอสักครู่':'')+'\n'+t.slice(0,200))}
+    const d=await r.json();
+    const res=JSON.parse(d.candidates[0].content.parts[0].text);
+    renderResult(res);addHist(res);
+    speak('วิเคราะห์เสร็จแล้ว สัญญาณ '+({BUY:'ซื้อ',SELL:'ขาย',WAIT:'รอดู'})[res.bias]);
+  }catch(e){
+    const o=$('out');o.replaceChildren(el('div','เกิดข้อผิดพลาด: '+e.message,'err'));
+  }finally{
+    $('load').classList.add('hid');$('out').classList.remove('hid');$('go').disabled=false;$('go').textContent='[ อีกครั้ง ] วิเคราะห์ด้วย AI';
+  }
+}
+
+/* ---------- Boot ---------- */
+$('saveKey').onclick=()=>{const v=$('key').value.trim();if(v){ls.set('gm_key',v);$('key').value='';$('key').placeholder='บันทึกคีย์แล้ว ✓'}};
+$('clrKey').onclick=()=>{ls.del('gm_key');$('key').placeholder='ลบคีย์แล้ว'};
+$('go').onclick=analyze;
+if(ls.get('gm_key'))$('key').placeholder='บันทึกคีย์แล้ว ✓';
+addEventListener('resize',drawSpark);
+buildTf();initChart();loadKlines();connect();showHist();
+setInterval(loadKlines,60000);
+</script>
+</body>
+</html>
